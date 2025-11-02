@@ -328,8 +328,9 @@ private:
    for (int i=firsti; i<lasti; ++i) {
     rangeSearchRecur(node->children[i], vec, begin, end);
     vec.push_back(node->keys[i]);
+   	std::cout << "mid pushback of key " << node->keys[i] << "\n";
    } rangeSearchRecur(node->children[lasti], vec, begin, end);
-   if (lasti != node->count && node->keys[lasti+1] == end) vec.push_back(node->keys[lasti+1]);
+   if (lasti != node->count && node->keys[lasti+1] == end && begin != end) vec.push_back(node->keys[lasti+1]);
   }
 public:
 
@@ -387,7 +388,7 @@ private:
    if (node->leaf && globalheight == -1) globalheight = height;
 
    TK prevkey;
-   if (node->count < (M-1)/2) {cout << "node count too small\n"; return false;}
+   if (node != root && node->count < (M-1)/2) {cout << "node count too small\n"; return false;}
    for (int i=0; i<node->count; ++i) {
     //los valores de las llaves deben estar dentro de los valores posibles
     if ((node->keys[i] >= topcap && usetopcap) || (node->keys[i] <= bottomcap && usebottomcap)) {cout << "node values out of cap range\n"; return false;}
