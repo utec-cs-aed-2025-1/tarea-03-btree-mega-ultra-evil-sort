@@ -16,14 +16,19 @@ struct Node {
 
   Node() : keys(nullptr), children(nullptr), count(0) {}
   Node(int M) {
-    keys = new TK[M - 1];
-    children = new Node<TK>*[M];
+    keys = new TK[M - 1]();
+    for (int i=0; i<M-1; ++i) keys[i] = 0;
+    children = new Node<TK>*[M]();
+    for (int i=0; i<M; ++i) children[i] = nullptr;
     count = 0;
     leaf = true;
   }
 
   void killSelf() {
-    // TODO
+    for (int i=0; i<count; ++i) {delete children[i]; children[i]=nullptr;}
+    delete[] children; children = nullptr;
+    delete[] keys; keys = nullptr;
+    delete this;
   }
 };
 
