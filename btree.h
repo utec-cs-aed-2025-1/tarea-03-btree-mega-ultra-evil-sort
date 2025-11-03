@@ -169,20 +169,27 @@ private:
     void merge(Node<TK> *parent, int idx) {
         Node<TK> *left = parent->children[idx];
         Node<TK> *right = parent->children[idx + 1];
+
         left->keys[left->count] = parent->keys[idx];
+
         int oldLeftCount = left->count;
         for (int i = 0; i < right->count; ++i)
             left->keys[oldLeftCount + 1 + i] = right->keys[i];
+
         if (!left->leaf)
             for (int i = 0; i <= right->count; ++i)
                 left->children[oldLeftCount + 1 + i] = right->children[i];
+
         left->count = oldLeftCount + right->count + 1;
+
         for (int i = idx; i < parent->count - 1; ++i)
             parent->keys[i] = parent->keys[i + 1];
         for (int i = idx + 1; i < parent->count; ++i)
             parent->children[i] = parent->children[i + 1];
+
         parent->count--;
         parent->children[parent->count + 1] = nullptr;
+
         if (right->keys) delete[] right->keys;
         if (right->children) delete[] right->children;
         delete right;
