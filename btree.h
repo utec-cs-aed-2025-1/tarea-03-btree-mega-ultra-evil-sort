@@ -393,18 +393,20 @@ private:
 public:
 
   TK minKey() {
+  	if (!root) throw std::runtime_error("minKey on empty tree");
    auto curr = root;
    while (!curr->leaf) curr = curr->children[0];
    return curr->keys[0];
   }  // minimo valor de la llave en el arbol
   TK maxKey() {
+  	if (!root) throw std::runtime_error("maxKey on empty tree");
    auto curr = root;
    while (!curr->leaf) curr = curr->children[curr->count];
    return curr->keys[curr->count-1];
   }  // maximo valor de la llave en el arbol
   void clear() {if (root == nullptr) return; root->killSelf(); root = nullptr; n=0;} // eliminar todos lo elementos del arbol
   int size() {return n;} // retorna el total de elementos insertados
-  
+
   // Construya un árbol B a partir de un vector de elementos ordenados
  template<typename T>
   static BTree* build_from_ordered_vector(vector<T> elements, int m) {
