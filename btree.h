@@ -1,6 +1,7 @@
 #ifndef BTree_H
 #define BTree_H
 #include <iostream>
+#include <optional>
 #include <vector>
 #include <stdexcept>
 #include "node.h"
@@ -510,23 +511,23 @@ private:
 public:
     // Verifique las propiedades de un árbol B
     bool check_properties() {
-        int globalheight = -1;
-        return check_properties_node(root, -1, -1, false, false, globalheight, 0);
+        if (!root) return true;
+        int leaf_h = -1;
+        return check_properties_node(root, nullopt, nullopt, leaf_h, 0);
     }
 
 private:
-    bool check_properties_node(Node<TK> *node, int bottomcap, int topcap, bool usebottomcap, bool usetopcap,
-                               int &globalheight, int height) {
-        //casos de si hay 0 nodos o 1 nodo
-        if (root == nullptr) return true;
-        if (node == nullptr) {
-            cout << "node evaluated is null\n";
-            return false;
-        }
+    bool check_properties_node(
+        Node<TK> *node,
+        optional<TK>& bottom,
+        optional<TK>& top,
+        int &leaf_h,
+        int height) {
+
         if (node == root && root->leaf) {
             TK rootprevkey;
             for (int i = 0; i < node->count; ++i) {
-                if (i != 0 && rootprevkey >= node->keys[i]) {
+                if (i != 0 && !(rootprevkey < node->keys[i])) {
                     cout << "internal root keys not ordered\n";
                     return false;
                 }
@@ -535,55 +536,60 @@ private:
             return true;
         }
         //compara height (altura propia) con globalheight (altura de la primera hoja encontrada)
-        if (node->leaf && globalheight != -1 && height != globalheight) {
+        if (node->leaf && leaf_h != -1 && height != leaf_h) {
             cout << "different leaf heights\n";
             return false;
         }
-        if (node->leaf && globalheight == -1) globalheight = height;
+        if (node->leaf && leaf_h == -1) leaf_h = height;
 
         TK prevkey;
-        if (node != root && node->count < (M - 1) / 2) {
+        if (node != root && node->count < min_keys()) {
             cout << "node count too small\n";
             return false;
         }
+
+        if (node->count > M - 1) {
+            cout << "node count too large \n";
+            return false;
+        }
+
+        // check unificado (todos los hijos posibles en un solo check)
+        if (!node->leaf) {
+            for (int i = 0; i <= node->count; ++i) {
+                if (node->children[i] == nullptr) {
+                    cout << "missing child pointer\n";
+                    return false;
+                }
+            }
+        }
+
         for (int i = 0; i < node->count; ++i) {
             //los valores de las llaves deben estar dentro de los valores posibles
-            if ((node->keys[i] >= topcap && usetopcap) || (node->keys[i] <= bottomcap && usebottomcap)) {
+            if ( (bottom && !(*bottom < node->keys[i])) ||
+                 (top && !(node->keys[i] < *top)) ) {
                 cout << "node values out of cap range\n";
                 return false;
             }
-            //debe haber todos los hijos posibles
-            if (!node->leaf && node->children[i] == nullptr) {
-                cout << "node does not have all possible children\n";
-                return false;
-            }
+
             //el hijo izquierdo del nodo i debe cumplir con estar dentro de los valores y todas las propiedades (llamada recursiva)
-            if (i == 0) {
-                if (!node->leaf && !check_properties_node(node->children[i], bottomcap, node->keys[i], usebottomcap,
-                                                          true,
-                                                          globalheight, height + 1))
-                    return false;
-            } else {
-                if (!node->leaf && !check_properties_node(node->children[i], node->keys[i - 1], node->keys[i], true,
-                                                          true,
-                                                          globalheight, height + 1))
-                    return false;
+            if (!node->leaf) {
+                if (i == 0) {
+                    if (!check_properties_node(node->children[i], bottom, node->keys[i],leaf_h, height + 1))
+                        return false;
+                } else {
+                    if (check_properties_node(node->children[i], node->keys[i - 1], node->keys[i], leaf_h, height + 1))
+                        return false;
+                }
             }
             //los elementos deben estar ordenados ascendentemente sin repetidos en un mismo nodo
-            if (i != 0 && prevkey >= node->keys[i]) {
+            if (i != 0 && !(prevkey < node->keys[i])) {
                 cout << "internal non-root node keys not ordered\n";
                 return false;
             }
             prevkey = node->keys[i];
         }
         if (!node->leaf) {
-            //verificación de que cumpla el último hijo
-            if (node->children[node->count] == nullptr) {
-                cout << "last child is nullptr\n";
-                return false;
-            }
-            if (!check_properties_node(node->children[node->count], node->keys[node->count - 1], topcap, true,
-                                       usetopcap, globalheight, height + 1)) return false;
+            if (!check_properties_node(node->children[node->count], node->keys[node->count - 1], top, leaf_h, height + 1)) return false;
         }
         return true;
     }
