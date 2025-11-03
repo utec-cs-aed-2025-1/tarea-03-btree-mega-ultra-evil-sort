@@ -283,7 +283,6 @@ class BTree {
       for (int i=(M+1)/2; i<M+1; ++i) {newNode->children[i-(M+1)/2] = newChildren[i];}
      } curr->count = (M-1)/2;
      for (int i=(M-1)/2+1; i<M; ++i) curr->children[i] = nullptr;
-     for (int i=(M-1)/2; i<M-1; ++i) curr->keys[i] = 0;
      lastNewNode = newNode;
      stack.pop();
     } else {
