@@ -584,7 +584,7 @@ private:
                     if (!check_properties_node(node->children[i], bottom, node->keys[i],leaf_h, height + 1))
                         return false;
                 } else {
-                    if (check_properties_node(node->children[i], node->keys[i - 1], node->keys[i], leaf_h, height + 1))
+                    if (!check_properties_node(node->children[i], node->keys[i - 1], node->keys[i], leaf_h, height + 1))
                         return false;
                 }
             }
