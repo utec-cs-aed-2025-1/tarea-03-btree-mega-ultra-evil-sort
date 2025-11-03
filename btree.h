@@ -253,8 +253,8 @@ class BTree {
 
    bool splitfinished = false;
    TK keytoadd = key;
-   TK* newKeys = new TK[M];
-   Node<TK>** newChildren = new Node<TK>*[M+1];
+   std::vector<TK> newKeys(M);
+  	std::vector<Node<TK>*> newChildren(M+1, nullptr);
    Node<TK>* lastNewNode = nullptr;
    while (!stack.empty() && !splitfinished) {
     curr = stack.top();
