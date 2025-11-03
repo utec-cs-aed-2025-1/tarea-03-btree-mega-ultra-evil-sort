@@ -436,31 +436,28 @@ private:
                 node->keys[i]);
             return;
         }
-        //fijar i's de comienzo y final de los nodos a retornar.
-        int firsti = -1;
-        int lasti = -1;
+        // calcular límites en el nodo interno
+        // firsti = primer índice con keys[i] >= begin
+        int firsti = node->count;
         for (int i = 0; i < node->count; ++i) {
-            if (begin < node->keys[i]) firsti = i;
-            if (end < node->keys[i] && lasti == -1) lasti = i;
+            if (node->keys[i] >= begin) {firsti = i; break; }
         }
-        if (firsti != -1 && lasti == -1) lasti = node->count;
-        //si ninguna de las llaves está en el rango, añade lo que pueda del hijo mayor.
-        //si este no tiene nada simplemente no lo añadirá ya que solo se añaden elementos entre begin y end
-        if (firsti == -1) {
-            if (node->keys[node->count - 1] == begin) vec.push_back(node->keys[node->count - 1]);
+
+        // lasti = primer índice con keys[i] > end
+        int lasti = node->count;
+        for (int i = 0; i < node->count; ++i) {
+            if (node->keys[i] >= end) {lasti = i; break; }
+        }
+        //si todas las llaves son < begin, baja por el hijo más a la derecha
+        if (firsti == node->count) {
             rangeSearchRecur(node->children[node->count], vec, begin, end);
-            return;
         }
-        //realiza la inserción en el vector de los valores de los nodos e hijos entre begin y end. incluye las llaves
-        //exteriores en caso sean iguales a begin y end
-        if (firsti != 0 && node->keys[firsti - 1] == begin) vec.push_back(node->keys[firsti - 1]);
+
+        rangeSearchRecur(node->children[firsti], vec, begin, end);
         for (int i = firsti; i < lasti; ++i) {
-            rangeSearchRecur(node->children[i], vec, begin, end);
             vec.push_back(node->keys[i]);
-            std::cout << "mid pushback of key " << node->keys[i] << "\n";
+            rangeSearchRecur(node->children[i+1], vec, begin, end);
         }
-        rangeSearchRecur(node->children[lasti], vec, begin, end);
-        if (lasti != node->count && node->keys[lasti + 1] == end && begin != end) vec.push_back(node->keys[lasti + 1]);
     }
 
 public:
