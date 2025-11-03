@@ -258,7 +258,7 @@ private:
     }
 
 public:
-    BTree(int _M) : root(nullptr), M(_M), n(0) { if (M < 3) throw invalid_argument("M too small"); }
+    explicit BTree(int _M) : root(nullptr), M(_M), n(0) { if (M < 3) throw invalid_argument("M too small"); }
 
     bool search(TK key) {
         if (root == nullptr) return false;
@@ -370,7 +370,7 @@ public:
         }
         if (!splitfinished) {
             //crear nuevo nodo raíz
-            Node<TK> *newRoot = new Node<TK>(M);
+            auto *newRoot = new Node<TK>(M);
             newRoot->count = 1;
             newRoot->keys[0] = keytoadd;
             newRoot->children[1] = lastNewNode;
@@ -415,14 +415,14 @@ public:
     } // recorrido inorder
     string toStringRecur(Node<TK> *node, const string &sep, bool lastsep) {
         if (node->leaf) {
-            std::string outputleaf = "";
+            std::string outputleaf;
             for (int i = 0; i < node->count; ++i) {
                 outputleaf += keytostr(node->keys[i]);
                 if (lastsep || i != node->count - 1) outputleaf += sep;
             }
             return outputleaf;
         }
-        std::string output = "";
+        std::string output;
         for (int i = 0; i < node->count; ++i) {
             output += toStringRecur(node->children[i], sep, true);
             output += keytostr(node->keys[i]) + sep;
@@ -526,8 +526,8 @@ public:
 private:
     bool check_properties_node(
         Node<TK> *node,
-        optional<TK>& bottom,
-        optional<TK>& top,
+        const optional<TK>& bottom,
+        const optional<TK>& top,
         int &leaf_h,
         int height) {
 
