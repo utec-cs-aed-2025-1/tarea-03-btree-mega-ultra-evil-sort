@@ -2,11 +2,66 @@
 #define BTree_H
 #include <iostream>
 #include <vector>
-#include <stack>
 #include <stdexcept>
 #include "node.h"
 
 using namespace std;
+
+//implementación de un stack
+
+template<typename T>
+struct ListNode {T val; ListNode* next = nullptr; ListNode() = default; explicit ListNode(T val): val(val){}};
+
+template<typename T>
+struct ForwardList {
+	ListNode<T>* head; ListNode<T>* tail; int sz;
+	ForwardList(): head(nullptr), tail(nullptr), sz(0) {}
+	explicit ForwardList(T val): head(new ListNode(val)), sz(1) {tail = head;}
+	void push_front(T val) {auto* node = new ListNode(val); node->next = head; head = node; ++sz; if (sz == 1) tail = head;}
+	void pop_front() {
+		if (head == nullptr) throw std::runtime_error("List is empty");
+		if (sz == 1) tail = nullptr;
+		auto temp = head; head = head->next; delete temp; --sz;
+	}
+	void push_back(T val) {
+		auto* node = new ListNode(val);
+		if (tail != nullptr) tail->next = node;
+		tail = node; ++sz;
+		if (sz == 1) head = tail;
+	}
+	int size() {return sz;}
+	bool empty() {return sz == 0;}
+	ForwardList(const ForwardList& other) {
+		ListNode<T>* curr = other.head;
+		head = nullptr; tail = nullptr; sz = 0;
+		while (curr) {push_back(curr->val); curr = curr->next;}
+	}
+	ForwardList& operator=(const ForwardList& other) {
+		while (head) pop_front();
+		ListNode<T>* curr = other.head;
+		while (curr) {push_back(curr->val); curr = curr->next;}
+		return *this;
+	}
+	~ForwardList() {while (head != nullptr) pop_front();}
+};
+
+template<typename T>
+struct Stack {
+	ForwardList<T> fl;
+	Stack() = default;
+	void push(T val) {fl.push_front(val);}
+	void pop() {fl.pop_front();}
+	T top() {if (fl.empty()) throw std::runtime_error("Stack is empty"); return fl.head->val;}
+	int size() {return fl.sz;}
+	bool empty() {return fl.sz == 0;}
+};
+
+
+
+
+
+
+//BTree
 
 template <typename TK>
 class BTree {
@@ -185,7 +240,7 @@ class BTree {
     root = new Node<TK>(M);
     root->count = 1; root->keys[0] = key; n=1; root->leaf = true; return;
    }
-   std::stack<Node<TK>*> stack;
+   Stack<Node<TK>*> stack;
    auto curr = root;
    while (!curr->leaf) {
     stack.push(curr);
@@ -421,5 +476,6 @@ public:
    n = 0;
   }     // liberar memoria
 };
+
 
 #endif
