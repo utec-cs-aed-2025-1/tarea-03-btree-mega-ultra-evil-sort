@@ -243,13 +243,17 @@ class BTree {
    Stack<Node<TK>*> stack;
    auto curr = root;
    while (!curr->leaf) {
-    stack.push(curr);
-    for (int i=0; i<curr->count; ++i) {
-     if (curr->keys[i] == key) return;
-     if (curr->keys[i] > key) {curr=curr->children[i]; break;}
-     if (i >= curr->count-1) {curr=curr->children[i+1]; break;}
-    }
-   } stack.push(curr);
+	   stack.push(curr);
+   	for (int i=0; i<curr->count; ++i) {
+   		if (curr->keys[i] == key) return;
+   		if (curr->keys[i] > key) {curr=curr->children[i]; break;}
+   		if (i >= curr->count-1) {curr=curr->children[i+1]; break;}
+   	}
+   }
+  	for (int i = 0; i < curr->count; ++i) {
+  		if (curr->keys[i] == key) return;
+  	}
+  	stack.push(curr);
 
    bool splitfinished = false;
    TK keytoadd = key;
